@@ -26,6 +26,22 @@ Create plots from the CSVs:
 python plot_seats.py
 ```
 
+## Model notes
+
+The simulation uses a Dirichlet draw around the base forecast, plus a
+correlated bloc swing applied before the Dirichlet step.
+
+Bloc mapping:
+
+- Left bloc: PC, GEW, Ll, LD
+- Right bloc: RU, CU, Oth
+
+Tunable parameters in `simulate_seats.py`:
+
+- `CONCENTRATION`: lower values increase variation
+- `SWING_SD`: bloc swing standard deviation
+- `SWING_RHO`: correlation between left/right swings (negative = opposing)
+
 ## Outputs
 
 - `seat_outcomes.csv`: outcome frequency by seat allocation

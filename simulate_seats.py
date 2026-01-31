@@ -6,6 +6,11 @@ import numpy as np
 LISTS = ["PC", "RU", "GEW", "CU", "Ll", "LD", "Oth"]
 BASE_SHARES = [0.304, 0.236, 0.147, 0.088, 0.052, 0.136, 0.037]
 CONCENTRATION = 50
+SWING_SD = 0.03
+SWING_RHO = -0.5
+
+LEFT_BLOC = {"PC", "GEW", "Ll", "LD"}
+RIGHT_BLOC = {"RU", "CU", "Oth"}
 
 
 def dhondt_seats(votes, seats):
@@ -25,6 +30,26 @@ def simulate_election(base_shares, seats=6, sims=1000, concentration=300):
     alpha = np.array(base_shares) * concentration
     outcomes = Counter()
     for _ in range(sims):
+        mean = np.array([0.0, 0.0])
+        cov = np.array(
+            [
+                [SWING_SD**2, SWING_RHO * SWING_SD**2],
+                [SWING_RHO * SWING_SD**2, SWING_SD**2],
+            ]
+        )
+        left_swing, right_swing = np.random.multivariate_normal(mean, cov)
+
+        swung = []
+        for name, share in zip(LISTS, base_shares):
+            if name in LEFT_BLOC:
+                swung.append(share * np.exp(left_swing))
+            else:
+                swung.append(share * np.exp(right_swing))
+
+        swung = np.array(swung)
+        swung /= swung.sum()
+
+        alpha = swung * concentration
         shares = np.random.dirichlet(alpha)
         seats_alloc = tuple(dhondt_seats(shares, seats))
         outcomes[seats_alloc] += 1
