@@ -43,6 +43,26 @@ def main():
     plt.tight_layout()
     plt.savefig("seat_distribution.png", dpi=150)
 
+    plt.figure(figsize=(10, 5))
+    x_vals = []
+    y_vals = []
+    sizes = []
+    for y, name in enumerate(lists):
+        for seats in range(7):
+            prob = seat_probs[name].get(seats, 0.0)
+            x_vals.append(seats)
+            y_vals.append(y)
+            sizes.append(1200 * prob + 10)
+
+    plt.scatter(x_vals, y_vals, s=sizes, alpha=0.7)
+    plt.yticks(range(len(lists)), lists)
+    plt.xticks(range(7))
+    plt.xlabel("Seats")
+    plt.ylabel("List")
+    plt.title("Seat Probability Dot Plot")
+    plt.tight_layout()
+    plt.savefig("seat_prob_dots.png", dpi=150)
+
 
 if __name__ == "__main__":
     main()
