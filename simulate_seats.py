@@ -5,6 +5,7 @@ import numpy as np
 
 LISTS = ["PC", "RU", "GEW", "CU", "Ll", "LD", "Oth"]
 BASE_SHARES = [0.304, 0.236, 0.147, 0.088, 0.052, 0.136, 0.037]
+CONCENTRATION = 150
 
 
 def dhondt_seats(votes, seats):
@@ -31,7 +32,12 @@ def simulate_election(base_shares, seats=6, sims=1000, concentration=300):
 
 
 def main():
-    outcomes = simulate_election(BASE_SHARES, seats=6, sims=1000, concentration=300)
+    outcomes = simulate_election(
+        BASE_SHARES,
+        seats=6,
+        sims=1000,
+        concentration=CONCENTRATION,
+    )
     total = sum(outcomes.values())
 
     with open("seat_outcomes.csv", "w", newline="") as f:
