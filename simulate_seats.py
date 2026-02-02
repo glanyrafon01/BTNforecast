@@ -5,7 +5,7 @@ import numpy as np
 
 LISTS = ["PC", "RU", "GEW", "CU", "Ll", "LD", "Oth"]
 BASE_SHARES = [0.304, 0.236, 0.147, 0.088, 0.052, 0.136, 0.037]
-CONCENTRATION = 200
+CONCENTRATION = 50
 SWING_SD = 0.03
 SWING_RHO = -0.5
 
