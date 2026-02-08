@@ -26,6 +26,33 @@ Create plots from the CSVs:
 python plot_seats.py
 ```
 
+## Config-driven workflow
+
+Edit `forecast.yaml` to update the core forecast and model settings. Then run:
+
+```bash
+python -m btnforecast simulate --config forecast.yaml --out outputs
+```
+
+Create plots from an output directory:
+
+```bash
+python -m btnforecast plot --input outputs/seat_probs.csv --out outputs
+```
+
+## Web UI
+
+Start the web app locally:
+
+```bash
+uvicorn app:app --reload --host 0.0.0.0 --port 8000
+```
+
+Optional environment variables:
+
+- `AUTH_TOKEN` to require a shared token for API calls
+- `FORECAST_CONFIG` to set the default YAML shown in the UI
+
 ## Model notes
 
 The simulation uses a Dirichlet draw around the base forecast, plus a
@@ -36,7 +63,7 @@ Bloc mapping:
 - Left bloc: PC, GEW, Ll, LD
 - Right bloc: RU, CU, Oth
 
-Tunable parameters in `simulate_seats.py`:
+Tunable parameters now live in `forecast.yaml`:
 
 - `CONCENTRATION`: lower values increase variation
 - `SWING_SD`: bloc swing standard deviation
@@ -48,3 +75,6 @@ Tunable parameters in `simulate_seats.py`:
 - `seat_probs.csv`: per-list seat probability distribution
 - `expected_seats.png`: expected seats per list
 - `seat_distribution.png`: stacked seat probabilities per list
+- `seat_prob_dots.png`: per-seat probability dot plot
+- `summary.json`: decision-support summary stats
+- `sensitivity.csv`: expected-seat deltas for +/- vote-share shifts

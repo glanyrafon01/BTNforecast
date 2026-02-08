@@ -1,2 +1,5 @@
 numpy
 matplotlib
+pyyaml
+fastapi
+uvicorn

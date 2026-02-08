@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: btnforecast
+    env: docker
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: AUTH_TOKEN
+        generateValue: true
+      - key: FORECAST_CONFIG
+        value: forecast.yaml
