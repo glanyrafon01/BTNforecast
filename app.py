@@ -4,6 +4,7 @@ from typing import Any, cast
 
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse
+import markdown
 from pydantic import BaseModel
 
 from btnforecast.config import override_config, parse_config_yaml
@@ -30,6 +31,15 @@ def _default_config_text() -> str:
         return ""
 
 
+def _instructions_html() -> str:
+    try:
+        with open("INSTRUCTIONS.md", "r", encoding="utf-8") as handle:
+            text = handle.read()
+    except FileNotFoundError:
+        return ""
+    return markdown.markdown(text)
+
+
 def _require_token(token: str | None) -> None:
     expected = os.environ.get("AUTH_TOKEN")
     if expected and token != expected:
@@ -39,6 +49,7 @@ def _require_token(token: str | None) -> None:
 @app.get("/", response_class=HTMLResponse)
 def index() -> str:
     config_text = _default_config_text()
+    instructions_html = _instructions_html()
     template = """
 <!doctype html>
 <html lang=\"en\">
@@ -49,6 +60,9 @@ def index() -> str:
     <script src=\"https://cdn.plot.ly/plotly-2.30.0.min.js\"></script>
     <style>
       body { font-family: "Spectral", serif; margin: 32px; color: #12222b; background: linear-gradient(180deg, #f3f6f7, #e6edf0); }
+      .hero { background: #0b3b4c; color: #f8fbfc; padding: 24px 28px; border-radius: 12px; margin-bottom: 24px; }
+      .hero h1 { margin: 0; font-size: 32px; }
+      .hero p { margin: 8px 0 0; font-size: 16px; opacity: 0.9; }
       h1 { font-size: 28px; margin-bottom: 8px; }
       .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
       textarea { width: 100%; height: 320px; font-family: "Fira Mono", monospace; }
@@ -58,12 +72,19 @@ def index() -> str:
       .card { background: #fff; border-radius: 10px; padding: 16px; box-shadow: 0 10px 20px rgba(16, 24, 32, 0.08); }
       .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
       pre { background: #0d1b22; color: #d6f5ff; padding: 12px; border-radius: 8px; overflow-x: auto; }
+      .instructions { margin-top: 32px; }
+      .instructions h2 { margin-top: 0; }
+      .instructions h3 { margin-top: 20px; }
+      .instructions ul { padding-left: 20px; }
+      .instructions code { background: #eef3f5; padding: 2px 4px; border-radius: 4px; }
     </style>
     <link href=\"https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400;500&family=Spectral:wght@400;600&display=swap\" rel=\"stylesheet\">
   </head>
   <body>
-    <h1>BTNforecast</h1>
-    <p>Run seat simulations with your latest forecast, then explore the results.</p>
+    <section class=\"hero\">
+      <h1>Senedd Constituency Forecaster</h1>
+      <p>Run seat simulations from your latest forecast and explore decision-support outputs.</p>
+    </section>
     <div class=\"grid\">
       <div class=\"card\">
         <label for=\"config\">Forecast YAML</label>
@@ -93,6 +114,10 @@ def index() -> str:
       <div class=\"card\"><div id=\"expectedChart\"></div></div>
       <div class=\"card\"><div id=\"dotChart\"></div></div>
     </div>
+    <section class=\"instructions card\">
+      <h2>Instructions</h2>
+      __INSTRUCTIONS_HTML__
+    </section>
     <script>
       const statusEl = document.getElementById("status");
       const summaryEl = document.getElementById("summary");
@@ -180,7 +205,10 @@ def index() -> str:
   </body>
 </html>
 """
-    return template.replace("__CONFIG_TEXT__", config_text)
+    return (
+        template.replace("__CONFIG_TEXT__", config_text)
+        .replace("__INSTRUCTIONS_HTML__", instructions_html)
+    )
 
 
 @app.post("/simulate")

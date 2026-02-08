@@ -3,3 +3,4 @@ matplotlib
 pyyaml
 fastapi
 uvicorn
+markdown
