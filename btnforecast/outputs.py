@@ -45,3 +45,8 @@ def write_sensitivity_csv(rows: list[dict], path: str) -> None:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()))
         writer.writeheader()
         writer.writerows(rows)
+
+
+def write_text_file(text: str, path: str) -> None:
+    with open(path, "w", encoding="utf-8") as handle:
+        handle.write(text)

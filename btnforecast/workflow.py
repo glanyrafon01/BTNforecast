@@ -19,6 +19,7 @@ from .outputs import (
 )
 from .plots import plot_seat_distributions
 from .sensitivity import sensitivity_table
+from .targeting import generate_pc_targeting_report
 
 
 def run_forecast(
@@ -85,6 +86,23 @@ def run_forecast(
     if run_plots:
         plot_paths = plot_seat_distributions(seat_probs, output_dir)
         outputs.update(plot_paths)
+
+    targeting_path = f"{output_dir}/pc_targeting.txt"
+    generate_pc_targeting_report(
+        config.lists,
+        config.base_shares,
+        config.seats,
+        config.sensitivity_sims,
+        config.concentration,
+        config.swing_sd,
+        config.swing_rho,
+        config.left_bloc,
+        config.right_bloc,
+        config.seed,
+        targeting_path,
+        delta=0.01,
+    )
+    outputs["pc_targeting_txt"] = targeting_path
 
     return {
         "summary": summary,

@@ -2,6 +2,11 @@
 
 Election simulation for a 6-seat D'Hondt constituency with closed lists.
 
+For a plain-English explanation of the assumptions and a step-by-step run guide,
+see `INSTRUCTIONS.md`.
+
+For a deeper explanation of the statistical approach, see `MODELLING.md`.
+
 ## Setup
 
 Create and activate a virtual environment, then install dependencies:
@@ -42,6 +47,8 @@ python -m btnforecast plot --input outputs/seat_probs.csv --out outputs
 
 ## Web UI
 
+Hosted UI: `https://btnforecast.onrender.com/`
+
 Start the web app locally:
 
 ```bash
@@ -52,6 +59,12 @@ Optional environment variables:
 
 - `AUTH_TOKEN` to require a shared token for API calls
 - `FORECAST_CONFIG` to set the default YAML shown in the UI
+
+When using the hosted deployment, enter the shared token in the UI or send it
+as the `X-Auth-Token` header to the API.
+
+If the token is not documented, retrieve it from the Render service settings
+under environment variables (the `AUTH_TOKEN` value).
 
 ## Model notes
 
@@ -78,3 +91,4 @@ Tunable parameters now live in `forecast.yaml`:
 - `seat_prob_dots.png`: per-seat probability dot plot
 - `summary.json`: decision-support summary stats
 - `sensitivity.csv`: expected-seat deltas for +/- vote-share shifts
+- `pc_targeting.txt`: model-based guidance for PC targeting scenarios
