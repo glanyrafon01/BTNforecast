@@ -1,5 +1,6 @@
 import os
 import uuid
+from typing import Any, cast
 
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse
@@ -38,7 +39,7 @@ def _require_token(token: str | None) -> None:
 @app.get("/", response_class=HTMLResponse)
 def index() -> str:
     config_text = _default_config_text()
-    return f"""
+    template = """
 <!doctype html>
 <html lang=\"en\">
   <head>
@@ -47,16 +48,16 @@ def index() -> str:
     <title>BTNforecast</title>
     <script src=\"https://cdn.plot.ly/plotly-2.30.0.min.js\"></script>
     <style>
-      body {{ font-family: "Spectral", serif; margin: 32px; color: #12222b; background: linear-gradient(180deg, #f3f6f7, #e6edf0); }}
-      h1 {{ font-size: 28px; margin-bottom: 8px; }}
-      .grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }}
-      textarea {{ width: 100%; height: 320px; font-family: "Fira Mono", monospace; }}
-      label {{ display: block; font-weight: 600; margin-top: 12px; }}
-      input {{ width: 100%; padding: 6px; }}
-      button {{ background: #0b3b4c; color: #fff; border: none; padding: 10px 16px; font-weight: 600; cursor: pointer; }}
-      .card {{ background: #fff; border-radius: 10px; padding: 16px; box-shadow: 0 10px 20px rgba(16, 24, 32, 0.08); }}
-      .charts {{ display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }}
-      pre {{ background: #0d1b22; color: #d6f5ff; padding: 12px; border-radius: 8px; overflow-x: auto; }}
+      body { font-family: "Spectral", serif; margin: 32px; color: #12222b; background: linear-gradient(180deg, #f3f6f7, #e6edf0); }
+      h1 { font-size: 28px; margin-bottom: 8px; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+      textarea { width: 100%; height: 320px; font-family: "Fira Mono", monospace; }
+      label { display: block; font-weight: 600; margin-top: 12px; }
+      input { width: 100%; padding: 6px; }
+      button { background: #0b3b4c; color: #fff; border: none; padding: 10px 16px; font-weight: 600; cursor: pointer; }
+      .card { background: #fff; border-radius: 10px; padding: 16px; box-shadow: 0 10px 20px rgba(16, 24, 32, 0.08); }
+      .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
+      pre { background: #0d1b22; color: #d6f5ff; padding: 12px; border-radius: 8px; overflow-x: auto; }
     </style>
     <link href=\"https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400;500&family=Spectral:wght@400;600&display=swap\" rel=\"stylesheet\">
   </head>
@@ -66,7 +67,7 @@ def index() -> str:
     <div class=\"grid\">
       <div class=\"card\">
         <label for=\"config\">Forecast YAML</label>
-        <textarea id=\"config\">{config_text}</textarea>
+        <textarea id=\"config\">__CONFIG_TEXT__</textarea>
         <label for=\"sims\">Simulations</label>
         <input id=\"sims\" type=\"number\" value=\"10000\" />
         <label for=\"sensitivity\">Sensitivity sims</label>
@@ -179,6 +180,7 @@ def index() -> str:
   </body>
 </html>
 """
+    return template.replace("__CONFIG_TEXT__", config_text)
 
 
 @app.post("/simulate")
@@ -200,13 +202,14 @@ def simulate(request: SimRequest, x_auth_token: str | None = Header(default=None
         run_sensitivity=True,
     )
 
+    outputs_map = cast(dict[str, Any], result["outputs"])
     outputs = {
         key: f"/outputs/{run_id}/{os.path.basename(path)}"
-        for key, path in result["outputs"].items()
+        for key, path in outputs_map.items()
     }
     seat_probs = {
         name: {str(seats): prob for seats, prob in probs.items()}
-        for name, probs in result["seat_probs"].items()
+        for name, probs in cast(dict[str, Any], result["seat_probs"]).items()
     }
     return {
         "run_id": run_id,
